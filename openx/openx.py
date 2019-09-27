@@ -11,17 +11,18 @@ import ssl
 import sys
 
 # A-Z Dev-written
-
+import config
 
 ########################################
 # DISPLAY ERROR                        #
 ########################################
 
 class Error:
-  def __init__(self, message='', title='Error', ec=1):
+  def __init__(self, message='', title='Error', fatal=True, ec=1):
     self.title = title
     self.message = message
     self.ec = ec
+    self.fatal = fatal
 
   def r(self):
     sys.stderr.write(f'{self.title}')
@@ -31,7 +32,8 @@ class Error:
 
     sys.stderr.write('\n')
 
-    sys.exit(self.ec)
+    if self.fatal:
+      sys.exit(self.ec)
 
 ########################################
 # ARGUMENT DECODER                     #
@@ -40,7 +42,8 @@ class Error:
 OPTIONS = {
   'verbose': False,
   'certfile': None,
-  'super': False
+  'super': False,
+  'configfile': None
 }
 
 def arg_decode(args):
@@ -70,6 +73,9 @@ def arg_decode(args):
             skip_flag = 1
           else:
             Error('No such file %s' % (args[i+1])).r()
+        elif arg == 'config':
+          OPTIONS['configfile'] = args[i+1]
+          skip_flag = 1
         else:
           Error('Invalid option --%s' % (arg)).r()
 
@@ -78,6 +84,9 @@ def arg_decode(args):
       # Flag Field
       if arg == 'v':
         OPTIONS['verbose'] = True
+      elif arg == 'c':
+        OPTIONS['configfile'] = args[i+1]
+        skip_flag = 1
       else:
         Error('Invalid flag -%s' % (arg)).r()
 
@@ -131,8 +140,9 @@ class OpenXServer(HTTPServer):
 
 def main(argc, argv):
   arg_decode(argv)
-
-  print(OPTIONS)
+  configurations = {'r':{},'t':{},'pub:':None}
+  if OPTIONS['configfile'] is not None:
+    configurations = config.configparse(OPTIONS['configfile'][:OPTIONS['configfile'].rfind('/')], OPTIONS['configfile'][OPTIONS['configfile'].rfind('/')+1:])
 
   httpd = OpenXServer(('127.0.0.1', 3000), OpenXHTTPRequestHandler)
   if OPTIONS['certfile'] is not None:
