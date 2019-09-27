@@ -91,7 +91,9 @@ def configparse(directory, file):
   result = {
     'r': {},
     't': {},
-    'pub:': None
+    'pub:': None,
+    'prt:': '8000',
+    'ipa:': '127.0.0.1'
   }
 
   with open(file, 'r') as f:

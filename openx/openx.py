@@ -140,11 +140,11 @@ class OpenXServer(HTTPServer):
 
 def main(argc, argv):
   arg_decode(argv)
-  configurations = {'r':{},'t':{},'pub:':None}
+  configurations = {'r':{},'t':{},'pub:':None,'prt:':'8000','ipa:':'127.0.0.1'}
   if OPTIONS['configfile'] is not None:
     configurations = config.configparse(OPTIONS['configfile'][:OPTIONS['configfile'].rfind('/')], OPTIONS['configfile'][OPTIONS['configfile'].rfind('/')+1:])
 
-  httpd = OpenXServer(('127.0.0.1', 3000), OpenXHTTPRequestHandler)
+  httpd = OpenXServer((configurations['ipa:'], int(configurations['prt:'])), OpenXHTTPRequestHandler)
   if OPTIONS['certfile'] is not None:
     httpd.socket = ssl.wrap_socket(httpd.socket, certfile=OPTIONS['certfile'], server_side=True)
   httpd.serve_forever()
