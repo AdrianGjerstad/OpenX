@@ -78,25 +78,25 @@ def configparse_a(line, result, line_num, directory):
 
   line = line[1:].lstrip()
 
-  if not os.path.isfile(directory + line):
+  if not os.path.isfile(result['pub:'] + line):
     Error('OpenX_Config: File on line %i is not a valid file' % (line_num), fatal=False).r()
     return
 
   try:
-    result[modifier][str(code)].append(directory + line)
+    result[modifier][str(code)].append(result['pub:'] + line)
   except KeyError:
-    result[modifier][str(code)] = [directory + line]
+    result[modifier][str(code)] = [result['pub:'] + line]
 
 def configparse(directory, file):
   result = {
     'r': {},
     't': {},
-    'pub:': None,
+    'pub:': '',
     'prt:': '8000',
     'ipa:': '127.0.0.1'
   }
 
-  with open(file, 'r') as f:
+  with open(directory + '/' + file, 'r') as f:
     line_num = 0
     for line in f:
       line_num += 1

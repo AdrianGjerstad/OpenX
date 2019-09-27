@@ -1,0 +1,15 @@
+# This is a test server. Please do not edit without permission.
+
+# Port and IP
+prt: 3000
+ipa: 127.0.0.1
+
+# Public Directory
+pub: /workspace/OpenX/testserver/public
+
+# Respond-With
+r403: /403.html
+r404: /404.html
+
+# Trigger-Code
+t403: /youcantaccessthis.txt

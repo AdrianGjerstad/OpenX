@@ -46,6 +46,8 @@ OPTIONS = {
   'configfile': None
 }
 
+configurations = None
+
 def arg_decode(args):
   skip_flag = 0
   for i in range(1, len(args)):
@@ -118,7 +120,7 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
   def do_GET(self):
     data = ''
     try:
-      data = open(os.environ['PWD'] + self.path, 'r').read()
+      data = open(configurations['pub:'] + self.path, 'r').read()
       self.send_response(200)
     except:
       data = '404 Not Found'
@@ -140,9 +142,42 @@ class OpenXServer(HTTPServer):
 
 def main(argc, argv):
   arg_decode(argv)
-  configurations = {'r':{},'t':{},'pub:':None,'prt:':'8000','ipa:':'127.0.0.1'}
+  global configurations
+  configurations = {'r':{},'t':{},'pub:':'','prt:':'8000','ipa:':'127.0.0.1'}
   if OPTIONS['configfile'] is not None:
     configurations = config.configparse(OPTIONS['configfile'][:OPTIONS['configfile'].rfind('/')], OPTIONS['configfile'][OPTIONS['configfile'].rfind('/')+1:])
+
+  if not os.path.isdir(configurations['pub:']) or configurations['pub:'].endswith('/'):
+    Error('Invalid public designation: ' + configurations['pub:'] + '\n\tIf there is one, please remove the slash from the end.').r()
+
+  try:
+    int(configurations['prt:'])
+  except ValueError:
+    Error('Port number given is not an integer.').r()
+
+  if not OPTIONS['super'] and int(configurations['prt:']) < 1024:
+    Error('Starting a server on port %s requires root.' % (configurations['prt:'])).r()
+
+  tmp = configurations['ipa:'].split('.')
+  if len(tmp) == 1:
+    if tmp[0] == 'localhost':
+      configurations['ipa:'] = '127.0.0.1'
+      Error('Use of IP address \'localhost\'. Use 127.0.0.1 next time.', 'Warning', fatal=False).r()
+    else:
+      Error('Invalid IPv4. Length=1.').r()
+  elif len(tmp) == 4:
+    for i in range(4):
+      try:
+        if int(tmp[i]) < 0 or int(tmp[i]) > 255:
+          Error('Byte overflow of IPv4 byte=' + str(i)).r()
+      except:
+        Error('Unknown IPv4 Address: ' + configurations['ipa:']).r()
+
+    if OPTIONS['verbose']:
+      print('Validation of IPv4 complete: ' + configurations['ipa:'])
+  else:
+    Error('Invalid IPv4 Length=' + str(len(tmp)))
+
 
   httpd = OpenXServer((configurations['ipa:'], int(configurations['prt:'])), OpenXHTTPRequestHandler)
   if OPTIONS['certfile'] is not None:
