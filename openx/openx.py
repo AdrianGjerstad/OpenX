@@ -117,16 +117,31 @@ except IOError as e:
 ########################################
 
 class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
+  def send_httpstatus(self, code, default):
+    global configurations
+    r_data_list = configurations['r'].get(str(code), [])
+    if len(r_data_list) >= 1:
+      return open(r_data_list[0], 'r')
+    return open(default, 'r')
+
   def do_GET(self):
-    data = ''
+    data = None
+    code = 100
+
+    if self.path.endswith('/'):
+      self.path += 'index.html'
+
     try:
-      data = open(configurations['pub:'] + self.path, 'r').read()
-      self.send_response(200)
-    except:
-      data = '404 Not Found'
-      self.send_response(404)
+      data = self.send_httpstatus(200, (configurations['pub:'][:-1*len(os.path.sep)] + self.path))
+      code = 200
+    except FileNotFoundError:
+      data = self.send_httpstatus(404, (os.environ['OPENXPATH'] + 'defaults/404.html'))
+      code = 404
+
+    self.send_response(code)
     self.end_headers()
-    self.wfile.write(bytes(data, 'utf-8'))
+
+    self.wfile.write(bytes(data.read(), 'utf-8'))
 
 ########################################
 # OPENXSERVER                          #
@@ -182,11 +197,16 @@ def main(argc, argv):
   else:
     Error('Invalid IPv4 Length=' + str(len(tmp)))
 
-
   httpd = OpenXServer((configurations['ipa:'], int(configurations['prt:'])), OpenXHTTPRequestHandler)
   if OPTIONS['certfile'] is not None:
     httpd.socket = ssl.wrap_socket(httpd.socket, certfile=OPTIONS['certfile'], server_side=True)
-  httpd.serve_forever()
+  try:
+    print('Serving HTTP%s at address %s:%s ...' % ('S' if OPTIONS['certfile'] is not None else '', configurations['ipa:'], configurations['prt:']))
+    httpd.serve_forever()
+  except KeyboardInterrupt:
+    print('\033[G\033[KShutdown server ...')
+    httpd.shutdown()
+    print('Server shutdown successfully.')
 
   return 0
 

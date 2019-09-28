@@ -108,9 +108,9 @@ def configparse_a(line, result, line_num, directory):
     return
 
   try:
-    result[modifier][str(code)].append(result['pub:'] + line)
+    result[modifier][str(code)].append(result['pub:'][:-1*len(os.path.sep)] + line)
   except KeyError:
-    result[modifier][str(code)] = [result['pub:'] + line]
+    result[modifier][str(code)] = [result['pub:'][:-1*len(os.path.sep)] + line]
 
 def configparse(directory, file, default=False):
   result = {
