@@ -143,9 +143,10 @@ class OpenXServer(HTTPServer):
 def main(argc, argv):
   arg_decode(argv)
   global configurations
-  configurations = {'r':{},'t':{},'pub:':'','prt:':'8000','ipa:':'127.0.0.1'}
   if OPTIONS['configfile'] is not None:
     configurations = config.configparse(OPTIONS['configfile'][:OPTIONS['configfile'].rfind('/')], OPTIONS['configfile'][OPTIONS['configfile'].rfind('/')+1:])
+  else:
+    configurations = config.configparse(default=True)
 
   if not os.path.isdir(configurations['pub:']) or configurations['pub:'].endswith('/'):
     Error('Invalid public designation: ' + configurations['pub:'] + '\n\tIf there is one, please remove the slash from the end.').r()
@@ -157,6 +158,12 @@ def main(argc, argv):
 
   if not OPTIONS['super'] and int(configurations['prt:']) < 1024:
     Error('Starting a server on port %s requires root.' % (configurations['prt:'])).r()
+
+  if int(configurations['prt:']) > 65535:
+    Error('Port integer (16-bit) overflow error: %s' % (configurations['prt:'])).r()
+
+  if OPTIONS['verbose']:
+    print('Validation of Port number complete: %s' % (configurations['prt:']))
 
   tmp = configurations['ipa:'].split('.')
   if len(tmp) == 1:

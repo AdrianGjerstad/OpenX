@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
+########################################
+# IMPORTS                              #
+########################################
+
 import os
 import string
 import sys
+
+import path
 
 ########################################
 # DISPLAY ERROR                        #
@@ -30,6 +36,10 @@ class Error:
 # CONFIGPARSE                          #
 ########################################
 
+REQUIRE_VALID_DIR = [
+  'pub:'
+]
+
 def configparse_a(line, result, line_num, directory):
   line = line.strip()
 
@@ -51,7 +61,15 @@ def configparse_a(line, result, line_num, directory):
 
     line = line[1:].lstrip()
 
+    if (rule_name + ':') in REQUIRE_VALID_DIR:
+      if not line.startswith(os.path.sep):
+        Error('OpenX_Config: Expected an absolute path for rule %s' % (rule_name)).r()
+      if not os.path.isdir(line):
+        Error('OpenX_Config: Expected a valid directory for rule %s' % (rule_name)).r()
+      line = path.fixpath(line)[0]
+
     result[rule_name + ":"] = line
+
     return
 
   modifier = 'r'
@@ -78,6 +96,13 @@ def configparse_a(line, result, line_num, directory):
 
   line = line[1:].lstrip()
 
+  if not line.startswith(os.path.sep):
+    Error('OpenX_Config: Expected an absolute path for line %i' % (line_num)).r()
+  if not os.path.isfile(result['pub:'] + line):
+    Error('OpenX_Config: Expected a valid file for line %i' % (line_num)).r()
+  tmp = path.fixpath(line)
+  line = tmp[0] + tmp[1]
+
   if not os.path.isfile(result['pub:'] + line):
     Error('OpenX_Config: File on line %i is not a valid file' % (line_num), fatal=False).r()
     return
@@ -87,7 +112,7 @@ def configparse_a(line, result, line_num, directory):
   except KeyError:
     result[modifier][str(code)] = [result['pub:'] + line]
 
-def configparse(directory, file):
+def configparse(directory, file, default=False):
   result = {
     'r': {},
     't': {},
@@ -96,7 +121,10 @@ def configparse(directory, file):
     'ipa:': '127.0.0.1'
   }
 
-  with open(directory + '/' + file, 'r') as f:
+  if default:
+    return result
+
+  with open(directory + os.path.sep + file, 'r') as f:
     line_num = 0
     for line in f:
       line_num += 1
