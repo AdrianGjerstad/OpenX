@@ -148,9 +148,6 @@ def main(argc, argv):
   else:
     configurations = config.configparse(default=True)
 
-  if not os.path.isdir(configurations['pub:']) or configurations['pub:'].endswith('/'):
-    Error('Invalid public designation: ' + configurations['pub:'] + '\n\tIf there is one, please remove the slash from the end.').r()
-
   try:
     int(configurations['prt:'])
   except ValueError:

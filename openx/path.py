@@ -38,6 +38,9 @@ def fixpath(path):
     elif path.endswith(os.path.sep) and not PATH_OPTIONS['TRAILING_SLASH']:
       path = path[:-1*len(os.path.sep)]
 
+    if PATH_OPTIONS['OMIT_FILE'] == FILE_OMIT_MODES['SEND_TUPLE']:
+      return (path, '')
+
     return path
   elif os.path.isfile(path):
     if PATH_OPTIONS['OMIT_FILE'] == FILE_OMIT_MODES['OMIT']:
@@ -52,5 +55,8 @@ def fixpath(path):
 
       if PATH_OPTIONS['TRAILING_SLASH']:
         path = (path[0] + '/', path[1])
+
+  if PATH_OPTIONS['OMIT_FILE'] == FILE_OMIT_MODES['SEND_TUPLE']:
+    return ('', path)
 
   return path

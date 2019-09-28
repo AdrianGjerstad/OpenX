@@ -103,7 +103,7 @@ def configparse_a(line, result, line_num, directory):
   tmp = path.fixpath(line)
   line = tmp[0] + tmp[1]
 
-  if not os.path.isfile(result['pub:'] + line):
+  if not os.path.isfile(result['pub:'][:-1*len(os.path.sep)] + line):
     Error('OpenX_Config: File on line %i is not a valid file' % (line_num), fatal=False).r()
     return
 
