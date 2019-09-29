@@ -7,6 +7,7 @@
 # A-Z Built-in
 from http.server import BaseHTTPRequestHandler,HTTPServer
 import os
+import platform
 import ssl
 import sys
 
@@ -139,6 +140,17 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
       code = 404
 
     self.send_response(code)
+
+    self._headers_buffer.pop(1)
+    self.send_header('Server', 'OpenX/0.1 Python/' + str(sys.version_info[0]) + '.' + str(sys.version_info[1]) + '.' + str(sys.version_info[2]) + ' (' + platform.system() + ')')
+
+    if data.name.endswith('.html'):
+      self.send_header('Content-Type', 'text/html')
+
+    self.send_header('Content-Length', str(os.path.getsize(data.name)))
+
+    print(self._headers_buffer)
+
     self.end_headers()
 
     self.wfile.write(bytes(data.read(), 'utf-8'))
