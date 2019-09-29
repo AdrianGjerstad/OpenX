@@ -12,16 +12,70 @@
       label {
         font-weight: 600;
       }
+      ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #F36;
+      }
+      li {
+        float: left;
+      }
+      li a:not(.search-link) {
+        display: block;
+        color: white;
+        text-decoration: none;
+        padding: 16px;
+        border-left: 0.5px solid #F9B;
+        border-right: 0.5px solid #F9B;
+        width: 100px;
+
+        -webkit-transition: background 1s, width 1s, border-left 1s, border-right 1s;
+        transition: background 1s, width 1s, border-left 1s, border-right 1s;
+      }
+      li.right {
+        float: right;
+      }
+      li a:hover:not(.search-link) {
+        background: #333;
+        width: 120px;
+        border-left: 0.5px solid #DDD;
+        border-right: 0.5px solid #DDD;
+      }
+      a {
+        color: white;
+      }
+      html {
+        -webkit-touch-callout: none; /* iOS Safari */
+          -webkit-user-select: none; /* Safari */
+           -khtml-user-select: none; /* Konqueror HTML */
+             -moz-user-select: none; /* Old versions of Firefox */
+              -ms-user-select: none; /* Internet Explorer/Edge */
+                  user-select: none; /* Non-prefixed version, currently
+                                        supported by Chrome, Opera and Firefox */
+      }
+      .search-link {
+        padding: 16px;
+      }
     </style>
   </head>
-  <body align='center' style='margin: 0; width: 100vw; overflow-x: hidden; font-family: "Montserrat", sans-serif; font-weight: 400;'>
+  <body align='center' style='margin: 0; width: 100vw; overflow-x: hidden; font-family: "Montserrat", sans-serif; font-weight: 400; font-size: 20px;'>
+    <ul>
+      <li><a href="/" draggable="false">Home</a></li>
+
+      <li style="float: right; padding: 4px; width: 50px;"><img src="http://www.newdesignfile.com/postpic/2009/05/white-search-icon-transparent_67215.png" width="26px" style="background: #F69; padding: 8px; border-radius: 80px; cursor: pointer;" onclick="search();"></img></li>
+      <li class="right"><a href="https://github.com/AdrianGjerstad/OpenX" draggable="false">GitHub</a></li>
+    </ul>
     <h1>OpenX Python Server Project</h1>
     <label>Oops! It looks like the file that you tried to access doesn't exist!</label>
-    <div style='margin: 100px auto 0 auto; width: 130vw; height: 200px; background: #36F; transform: rotate(5deg) translate(-80px,0);'></div>
-    <div style='background: #36F; min-height: 200px; transform: translate(0,-100px); padding: 8px 20%;'>
+    <p>The server sent a 404 error, so it looks like you be stuck with this page for now.</p>
+    <div style='margin: 100px auto 0 auto; width: 130vw; height: 200px; background: #F36; transform: rotate(5deg) translate(-80px,0);'></div>
+    <div style='position: absolute; background: #F36; min-height: 200px; transform: translate(0,-100px); padding: 8px 20%; color: white;'>
       <p>OpenX is a public and open-source Python server project. This means that OpenX is a program written in Python that can serve people like you different webpages! If you are seeing this page, it means that the owner of this server has not defined a page for a '404 Not Found' Error.</p>
       <label>Enough with the boring stuff. Here's a panda.</label>
-      <img draggable='false' src='http://owlconnected.com/wp-content/uploads/2019/06/dreamstime_s_3614210-e1559329833402.jpg' style='border-radius: 16px; margin: 16px;'></img>
+      <img draggable='false' src='http://owlconnected.com/wp-content/uploads/2019/06/dreamstime_s_3614210-e1559329833402.jpg' style='border-radius: 16px; margin: 16px;' width='500'></img><br/>
+      <label style='transform: translate(0,-60px); margin: 0 auto; display: block; width: 484px; background: rgba(0, 0, 0, 0.5); padding: 8px; border-radius: 0 0 16px 16px;'>Credit: <a href='http://owlconnected.com/' draggable='false'>OWLconnected</a></label>
     </div>
   </body>
 </html>
