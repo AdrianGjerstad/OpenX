@@ -22,10 +22,10 @@ class Error:
     self.fatal = fatal
 
   def r(self):
-    sys.stderr.write(f'{self.title}')
+    sys.stderr.write(self.title)
 
     if self.message != '':
-      sys.stderr.write(f': {self.message}')
+      sys.stderr.write(': %s' % (self.message))
 
     sys.stderr.write('\n')
 

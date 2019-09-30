@@ -26,10 +26,10 @@ class Error:
     self.fatal = fatal
 
   def r(self):
-    sys.stderr.write(f'{self.title}')
+    sys.stderr.write(self.title)
 
     if self.message != '':
-      sys.stderr.write(f': {self.message}')
+      sys.stderr.write(': %s' % (self.message))
 
     sys.stderr.write('\n')
 
@@ -131,7 +131,7 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
 
     if self.path.endswith('/'):
       self.path += 'index.html'
-
+    
     try:
       data = self.send_httpstatus(200, (configurations['pub:'][:-1*len(os.path.sep)] + self.path))
       code = 200
@@ -149,7 +149,7 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
 
     self.send_header('Content-Length', str(os.path.getsize(data.name)))
 
-    print(self._headers_buffer)
+    # print(self._headers_buffer)
 
     self.end_headers()
 
