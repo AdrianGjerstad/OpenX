@@ -1,1 +1,1 @@
-<img src='media/OpenX-logo.png' style='background: black; color: white;' alt='OpenX'></img>
+![OpenX](media/OpenX-logo.png)
