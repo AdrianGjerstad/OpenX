@@ -6,6 +6,7 @@
 
 # A-Z Built-in
 from http.server import BaseHTTPRequestHandler,HTTPServer
+import multiprocessing
 import os
 import platform
 import ssl
@@ -125,6 +126,19 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
       return open(r_data_list[0], 'r')
     return open(default, 'r')
 
+  def get_trigger(self, file):
+    global configurations
+    t_data_list = configurations['t']
+
+    for e in t_data_list:
+      code_data_list = t_data_list[e]
+
+      for e_ in range(len(code_data_list)):
+        if code_data_list[e_] == configurations['pub:'][:-1] + file:
+          return e
+
+    return None
+
   def do_GET(self):
     data = None
     code = 100
@@ -132,12 +146,22 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
     if self.path.endswith('/'):
       self.path += 'index.html'
     
-    try:
-      data = self.send_httpstatus(200, (configurations['pub:'][:-1*len(os.path.sep)] + self.path))
-      code = 200
-    except FileNotFoundError:
-      data = self.send_httpstatus(404, (os.environ['OPENXPATH'] + 'defaults/404.html'))
-      code = 404
+    trigger_code = self.get_trigger(self.path)
+
+    if trigger_code is not None:
+      code = int(trigger_code)
+      try:
+        data = self.send_httpstatus(code, (os.environ['OPENXPATH'] + 'defaults/403.html'))
+      except FileNotFoundError:
+        data = self.send_httpstatus(404, (os.environ['OPENXPATH'] + 'defaults/404.html'))
+        code = 404
+    else:
+      try:
+        data = self.send_httpstatus(200, (configurations['pub:'][:-1*len(os.path.sep)] + self.path))
+        code = 200
+      except FileNotFoundError:
+        data = self.send_httpstatus(404, (os.environ['OPENXPATH'] + 'defaults/404.html'))
+        code = 404
 
     self.send_response(code)
 
@@ -155,6 +179,12 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
 
     self.wfile.write(bytes(data.read(), 'utf-8'))
 
+  def log_message(self, format, *args):
+    sys.stderr.write("%s [%s] %s\n" %
+                     (self.address_string(),
+                      self.log_date_time_string(),
+                      format%args))
+
 ########################################
 # OPENXSERVER                          #
 ########################################
@@ -162,6 +192,17 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
 class OpenXServer(HTTPServer):
   def __init__(self, address_family, handler_class):
     super().__init__(address_family, handler_class)
+
+httpd = None
+
+def server_spawner():
+  global httpd
+  global configurations
+  try:
+    print('Serving HTTP%s at address %s:%s ...' % ('S' if OPTIONS['certfile'] is not None else '', configurations['ipa:'], configurations['prt:']))
+    httpd.serve_forever()
+  except KeyboardInterrupt:
+    httpd.shutdown()
 
 ########################################
 # MAIN                                 #
@@ -174,7 +215,7 @@ def main(argc, argv):
     configurations = config.configparse(OPTIONS['configfile'][:OPTIONS['configfile'].rfind('/')], OPTIONS['configfile'][OPTIONS['configfile'].rfind('/')+1:])
   else:
     configurations = config.configparse(default=True)
-
+  
   try:
     int(configurations['prt:'])
   except ValueError:
@@ -208,16 +249,21 @@ def main(argc, argv):
       print('Validation of IPv4 complete: ' + configurations['ipa:'])
   else:
     Error('Invalid IPv4 Length=' + str(len(tmp)))
-
+  
+  global httpd
   httpd = OpenXServer((configurations['ipa:'], int(configurations['prt:'])), OpenXHTTPRequestHandler)
   if OPTIONS['certfile'] is not None:
     httpd.socket = ssl.wrap_socket(httpd.socket, certfile=OPTIONS['certfile'], server_side=True)
+  
+  server_proc = multiprocessing.Process(target=server_spawner)
+  server_proc.start()
+
   try:
-    print('Serving HTTP%s at address %s:%s ...' % ('S' if OPTIONS['certfile'] is not None else '', configurations['ipa:'], configurations['prt:']))
-    httpd.serve_forever()
+    server_proc.join()
   except KeyboardInterrupt:
+    server_proc.terminate()
+    server_proc.join()
     print('\033[G\033[KShutdown server ...')
-    httpd.shutdown()
     print('Server shutdown successfully.')
 
   return 0
