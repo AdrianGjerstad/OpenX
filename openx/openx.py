@@ -14,6 +14,7 @@ import sys
 
 # A-Z Dev-written
 import config
+import times
 
 ########################################
 # DISPLAY ERROR                        #
@@ -182,8 +183,17 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
   def log_message(self, format, *args):
     sys.stderr.write("%s [%s] %s\n" %
                      (self.address_string(),
-                      self.log_date_time_string(),
+                      times.timestamp(),
                       format%args))
+
+    global configurations
+    if configurations['log:']:
+      self.server.logfile.write('%s [%s] %s\n' %
+                                (self.address_string(),
+                                 times.timestamp(),
+                                 format%args))
+
+      self.server.logfile.flush()
 
 ########################################
 # OPENXSERVER                          #
@@ -192,6 +202,13 @@ class OpenXHTTPRequestHandler(BaseHTTPRequestHandler):
 class OpenXServer(HTTPServer):
   def __init__(self, address_family, handler_class):
     super().__init__(address_family, handler_class)
+
+    global configurations
+    if configurations['log:']:
+      self.logfile = open('openx_' + times.timestamp().replace('.', ';') + '.log', 'x')
+      self.logfile.write('---- ' + self.logfile.name + ' ----\n')
+      self.logfile.write('- [%s] OpenX started serving HTTP%s at address %s:%s\n' % (times.timestamp(), 'S' if OPTIONS['certfile'] is not None else '', configurations['ipa:'], configurations['prt:']))
+      self.logfile.flush()
 
 httpd = None
 
@@ -264,6 +281,8 @@ def main(argc, argv):
     server_proc.terminate()
     server_proc.join()
     print('\033[G\033[KShutdown server ...')
+    httpd.logfile.write('- [%s] OpenX stopped serving HTTP%s at address %s:%s on case KeyboardInterrupt\n' % (times.timestamp(), 'S' if OPTIONS['certfile'] is not None else '', configurations['ipa:'], configurations['prt:']))
+    httpd.logfile.flush()
     print('Server shutdown successfully.')
 
   return 0

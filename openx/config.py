@@ -40,6 +40,10 @@ REQUIRE_VALID_DIR = [
   'pub:'
 ]
 
+REQUIRE_VALID_BOOL = [
+  'log:'
+]
+
 def configparse_a(line, result, line_num, directory):
   line = line.strip()
 
@@ -67,6 +71,15 @@ def configparse_a(line, result, line_num, directory):
       if not os.path.isdir(line):
         Error('OpenX_Config: Expected a valid directory for rule %s' % (rule_name)).r()
       line = path.fixpath(line)[0]
+    
+    elif rule_name in REQUIRE_VALID_BOOL:
+      line = line.lower()
+      if line == 'off' or line == 'false' or line == '0' or line == 'no' or line == 'low':
+        line = False
+      elif line == 'on' or line == 'true' or line == '1' or line == 'yes' or line == 'high':
+        line = True
+      else:
+        Error('OpenX_Config: Expected a valid boolean value for rule %s' % (rule_name)).r()
 
     result[rule_name + ":"] = line
 
@@ -118,7 +131,8 @@ def configparse(directory, file, default=False):
     't': {},
     'pub:': '',
     'prt:': '8000',
-    'ipa:': '127.0.0.1'
+    'ipa:': '127.0.0.1',
+    'log:': False
   }
 
   if default:

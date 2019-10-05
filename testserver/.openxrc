@@ -4,11 +4,14 @@
 prt: 3000
 ipa: 127.0.0.1
 
+# Logging enabled
+log: 1
+
 # Public Directory
-pub: /workspace/OpenX/testserver/public
+pub: /home/adrian/projects/OpenX/testserver/public
 
 # Respond-With
-r403: /403.html
+#r403: /403.html
 #r404: /404.html
 
 # Trigger-Code
