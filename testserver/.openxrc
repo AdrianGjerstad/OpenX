@@ -4,8 +4,9 @@
 prt: 3000
 ipa: 127.0.0.1
 
-# Logging enabled
+# Logging
 log: 1
+lgd: /home/adrian/projects/OpenX/testserver/logs
 
 # Public Directory
 pub: /home/adrian/projects/OpenX/testserver/public

@@ -37,7 +37,8 @@ class Error:
 ########################################
 
 REQUIRE_VALID_DIR = [
-  'pub:'
+  'pub:',
+  'lgd:'
 ]
 
 REQUIRE_VALID_BOOL = [
@@ -64,7 +65,7 @@ def configparse_a(line, result, line_num, directory):
       return
 
     line = line[1:].lstrip()
-
+    
     if (rule_name + ':') in REQUIRE_VALID_DIR:
       if not line.startswith(os.path.sep):
         Error('OpenX_Config: Expected an absolute path for rule %s' % (rule_name)).r()
@@ -82,7 +83,6 @@ def configparse_a(line, result, line_num, directory):
         Error('OpenX_Config: Expected a valid boolean value for rule %s' % (rule_name)).r()
 
     result[rule_name + ":"] = line
-
     return
 
   modifier = 'r'
@@ -132,7 +132,8 @@ def configparse(directory, file, default=False):
     'pub:': '',
     'prt:': '8000',
     'ipa:': '127.0.0.1',
-    'log:': False
+    'log:': False,
+    'lgd:': None
   }
 
   if default:
@@ -146,4 +147,7 @@ def configparse(directory, file, default=False):
 
     else:
       # No more lines to be read from file
+      if result['lgd:'] is None:
+        result['lgd:'] = path.fixpath(os.environ['PWD'])[0]
+      
       return result

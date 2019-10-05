@@ -205,9 +205,9 @@ class OpenXServer(HTTPServer):
 
     global configurations
     if configurations['log:']:
-      self.logfile = open('openx_' + times.timestamp().replace('.', ';') + '.log', 'x')
+      self.logfile = open(configurations['lgd:'] + 'openx_' + times.timestamp().replace('.', ';') + '.log', 'x')
       self.logfile.write('---- ' + self.logfile.name + ' ----\n')
-      self.logfile.write('- [%s] OpenX started serving HTTP%s at address %s:%s\n' % (times.timestamp(), 'S' if OPTIONS['certfile'] is not None else '', configurations['ipa:'], configurations['prt:']))
+      self.logfile.write('[META] [%s] OpenX started serving HTTP%s at address %s:%s\n' % (times.timestamp(), 'S' if OPTIONS['certfile'] is not None else '', configurations['ipa:'], configurations['prt:']))
       self.logfile.flush()
 
 httpd = None
